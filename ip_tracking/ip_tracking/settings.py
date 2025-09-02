@@ -41,6 +41,23 @@ INSTALLED_APPS = [
     'ip_tracking.ip_tracking',
 ]
 
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_BEAT_SCHEDULE = {
+    "anomaly-detection-hourly": {
+        "task": "ip_tracking.tasks.detect_anomalies",
+        "schedule": 3600.0,  # run every hour
+    },
+}
+
+
+# Configure DRF (optional, ensures 429 handling)
+REST_FRAMEWORK = {
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '5/minute',
+        'user': '10/minute',
+    }
+}
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -52,6 +69,7 @@ MIDDLEWARE = [
 
     # Custom middleware
     'ip_tracking.ip_tracking.middleware.IPLoggingMiddleware',
+    'ratelimit',
 ]
 
 ROOT_URLCONF = 'ip_tracking.urls'
